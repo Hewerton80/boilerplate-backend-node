@@ -1,0 +1,43 @@
+{
+  "name": "nlw5-node",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn tsc",
+    "start": "yarn build && node dist/server.js",
+    "start:dev": "nodemon",
+    "migration:create": "yarn build && typeorm migration:create -n",
+    "migration:generate": "yarn build && typeorm migration:generate -n",
+    "migration:run": "yarn build && typeorm migration:run",
+    "migration:revert": "yarn build && typeorm migration:revert"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "jsonwebtoken": "^8.5.1",
+    "pg": "^8.6.0",
+    "reflect-metadata": "^0.1.13",
+    "socket.io": "^4.0.1",
+    "socket.io-client": "^4.0.1",
+    "typeorm": "^0.2.32",
+    "typescript": "^4.2.4",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/cors": "^2.8.10",
+    "@types/ejs": "^3.0.6",
+    "@types/express": "^4.17.11",
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/node": "^15.0.1",
+    "@types/uuid": "^8.3.0",
+    "es6-shim": "^0.35.6",
+    "nodemon": "^2.0.7",
+    "ts-node-dev": "^1.1.6"
+  }
+}
