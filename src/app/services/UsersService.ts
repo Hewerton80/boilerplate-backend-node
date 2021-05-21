@@ -10,31 +10,16 @@ class UsersService {
         this.usersRepository = getCustomRepository(UsersRepository)
     }
 
-    // async create(email: string) {
-    //     const userArleadyExists = await this.usersRepository.findOne({
-    //         email
-    //     })
-    //     if (userArleadyExists) {
-    //         return userArleadyExists;
-    //     }
+    async getUserByPhone(phone: string, myPhone?: string) {
+        const query = this.usersRepository.createQueryBuilder('user')
+        query.andWhere('user.phone = :phone', { phone })
 
-    //     const user = this.usersRepository.create({
-    //         email
-    //     })
-    //     await this.usersRepository.save(user)
-    //     return user;
-    // }
-    // async findByEmail(email: string) {
-    //     const user = await this.usersRepository.findOne({ email });
-
-    //     return user;
-    // }
-    async getUserByPhone(phone: string) {
-        return this.usersRepository.findOne({
-            where: {
-                phone
-            }
-        })
+        if (myPhone) {
+            query.andWhere('user.phone != :myPhone', { myPhone })
+        }
+        
+        const user = await query.getOne();
+        return user;
     }
 
     async comparePassword(password: string, encrypted: string) {
