@@ -7,3 +7,11 @@ declare global{
         }
     }
 }
+
+declare global{
+    namespace SocketIo {
+        interface Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap> {
+            user: IJwt
+        }
+    }
+}

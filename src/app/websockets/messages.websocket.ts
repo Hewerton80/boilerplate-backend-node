@@ -1,9 +1,9 @@
 import { io } from "../../server";
-import { Message } from "../models/Messages";
-import { MessagesService } from "../services/MessagesService";
+// import { Message } from "../models/Messages";
+// import { MessagesService } from "../services/MessagesService";
 
 io.on("connect", async (socket) => {
-    const messagesService = new MessagesService();
+    // const messagesService = new MessagesService();
 
     socket.on("admin_list_messages_by_user", async (params, callback) => {
         // const { user_id } = params;

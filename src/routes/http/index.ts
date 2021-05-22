@@ -11,7 +11,9 @@ const messagesController = new MessagesController()
 const authController = new AuthController()
 const authMiddleaware = new AuthMiddleaware()
 
-routes.post('/auth/login', authController.login)
+routes.post('/auth/signIn', authController.signIn)
+routes.post('/auth/signUp', authController.signUp)
+
 routes.get('/user/phone', authMiddleaware.authenticate ,usersController.findUser)
 // routes.post('/messages', messagesController.create)
 

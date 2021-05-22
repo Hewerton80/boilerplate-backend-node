@@ -7,6 +7,7 @@ export class UsersController {
         const userService = new UsersService();
         const myPhone = request.user.phone;
         const user = await userService.getUserByPhone(String(phone), myPhone);
+        delete user?.created_at;
         return response.status(200).json({ user });
     }
 }

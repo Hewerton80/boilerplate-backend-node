@@ -3,10 +3,17 @@ import { AuthService } from '../../services/AuthService'
 
 export class AuthController {
 
-    async login(request: Request, response: Response) {
+    async signIn(request: Request, response: Response) {
+        const authService = new AuthService();
+        const { phone, password} = request.body;
+        const userWithToken = await authService.signIn(phone, password);
+        return response.status(200).json(userWithToken);
+    }
+
+    async signUp(request: Request, response: Response) {
         const authService = new AuthService();
         const { name, phone, password} = request.body;
-        const userWithToken = await authService.login(name, phone, password);
+        const userWithToken = await authService.signUp(name, phone, password);
         return response.status(200).json(userWithToken);
     }
 

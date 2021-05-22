@@ -26,7 +26,7 @@ export class User extends BaseEntity {
     password?: string;
 
     @CreateDateColumn()
-    created_at: Date;
+    created_at?: Date;
 
     @OneToMany(() => Message, message => message.user, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     messages: Message[];
