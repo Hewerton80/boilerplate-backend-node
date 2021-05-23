@@ -1,18 +1,19 @@
 
+import { getManager } from "typeorm";
 import { io } from "../../server";
-import { Group } from "../models/Groups";
 import { GroupsService } from "../services/GroupService";
 import { UsersService } from "../services/UsersService";
-import { ExtendedSocket, IJwt } from "../types/AuthTypes";
+import { IJwt } from "../types/AuthTypes";
 // import { GroupService } from "../services/GroupService";
 
 
 io.on("connect", async (socket) => {
     const groupsService = new GroupsService();
     const usersService = new UsersService();
-    socket.on("create_privaty_group", async (userId: string, callback) => {
+    const me = socket?.user as IJwt;
 
-        const me = socket?.user as IJwt;
+    socket.on("create_private_group", async (userId: string, callback) => {
+        
         // verifica se já existe um grupo com os dois usuários
         let privateGroup = await groupsService.getPrivateGroupByUsers(me.id, userId); 
 
@@ -20,8 +21,31 @@ io.on("connect", async (socket) => {
             privateGroup = await groupsService.createPrivateGroup(me.id, userId)
         }
         await privateGroup.getUsers();
+        const user = privateGroup.users?.find(u => u.id !== me.id);
+        privateGroup.name = String(user?.name);
+        privateGroup.lastMsg = '';
+        privateGroup.lastMsgTime = '';
+        privateGroup.countMsgsUnread = 0;
         callback(privateGroup);
+    });
 
+    socket.on("get_my_groups", async (page: number, callback) => {
+        const groups = await groupsService.getGroupsByUser(me.id, 'all'); 
+        await Promise.all(groups.map(async gp =>{
+            await gp.getUsers() ;
+            return gp;
+        }));
+        groups.forEach(gp =>{
+            if(gp.is_private){
+                const user = gp.users?.find(u => u.id !== me.id);
+                gp.name = String(user?.name);
+            }
+            gp.lastMsg = '';
+            gp.lastMsgTime = '12:45';
+            gp.countMsgsUnread = 0;
+        })
+
+        callback(groups);
     });
 
 })

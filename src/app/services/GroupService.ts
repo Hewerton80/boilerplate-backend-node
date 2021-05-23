@@ -14,35 +14,6 @@ class GroupsService {
         this.groupUsersRepository = getCustomRepository(UserGroupRepository);
     }
 
-    async getGroupsByUser(userId: string, isPrivaty: boolean) {
-        const groups = await this.groupsRepository.createQueryBuilder('groups')
-            .leftJoinAndSelect('groups.user_groups', 'user_groups')
-            .andWhere('user_groups.user_id = :user_id', { user_id: userId })
-            .andWhere('groups.is_private = :is_private', { is_private: isPrivaty })
-            .select([
-                'groups.id',
-                'groups.name',
-                'groups.is_private',
-            ])
-            .getMany()
-        return groups;
-    }
-    async getPrivateGroupByUsers(meId: string, otherUserId: string) {
-        const myGroups = await this.getGroupsByUser(meId, true);
-        // console.log(myGroups)
-        const groupFound = await this.groupsRepository.createQueryBuilder('groups')
-            .leftJoinAndSelect('groups.user_groups', 'user_groups')
-            .andWhere('user_groups.user_id = :user_id', { user_id: otherUserId })
-            .andWhere('groups.is_private = :is_private', { is_private: true })
-            .andWhereInIds(myGroups.map(gp => gp.id))
-            .select([
-                'groups.id',
-                'groups.name',
-                'groups.is_private',
-            ])
-            .getOne()
-        return groupFound;
-    }
 
     async createPrivateGroup(authorId: string, otherUserId: string) {
         const privateGroup = new Group();
@@ -67,6 +38,46 @@ class GroupsService {
 
         return privateGroup;
     }
+
+    async getGroupsByUser(userId: string, type: 'private' | 'public' | 'all') {
+        const query = this.groupsRepository.createQueryBuilder('groups')
+            .leftJoinAndSelect('groups.user_groups', 'user_groups')
+            .andWhere('user_groups.user_id = :user_id', { user_id: userId })
+            .select([
+                'groups.id',
+                'groups.name',
+                'groups.is_private',
+                'groups.created_at'
+            ])
+        if (type === 'private') {
+            query.andWhere('groups.is_private = :is_private', { is_private: true })
+                // .leftJoinAndSelect('user_groups.user', 'user')
+                // .leftJoinAndMapOne('user_groups.user', 'user_groups.user', 'user', 'user.id != :user_id', { user_id: userId })
+                // .addSelect(['user'])
+        }
+        else if(type === 'public'){
+            query.andWhere('groups.is_private = :is_private', { is_private: false })
+        }
+        const groups = await query.getMany()
+        return groups;
+    }
+    async getPrivateGroupByUsers(meId: string, otherUserId: string) {
+        const myGroups = await this.getGroupsByUser(meId, 'private');
+        // console.log(myGroups)
+        const groupFound = await this.groupsRepository.createQueryBuilder('groups')
+            .leftJoinAndSelect('groups.user_groups', 'user_groups')
+            .andWhere('user_groups.user_id = :user_id', { user_id: otherUserId })
+            .andWhere('groups.is_private = :is_private', { is_private: true })
+            .andWhereInIds(myGroups.map(gp => gp.id))
+            .select([
+                'groups.id',
+                'groups.name',
+                'groups.is_private',
+            ])
+            .getOne()
+        return groupFound;
+    }
+
 }
 
 export { GroupsService }

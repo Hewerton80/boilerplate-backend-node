@@ -41,6 +41,10 @@ export class Group extends BaseEntity {
 
     users?: User[];
 
+    lastMsg: string;
+    lastMsgTime: string;
+    countMsgsUnread: number;
+
     async getUsers() {
         const usersRepository = getCustomRepository(UsersRepository)
         const users = await usersRepository.createQueryBuilder('users')
