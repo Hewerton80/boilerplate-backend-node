@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, getCustomRepository, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, getCustomRepository, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { UsersRepository } from "../repositories/UsersRepository";
 
 import { Message } from "./Messages";
@@ -39,6 +39,8 @@ export class Group extends BaseEntity {
     @OneToMany(() => UserGroup, userGroup => userGroup.group, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     user_groups: UserGroup[];
 
+    @ManyToMany(() => User, user => user.groups)
+    @JoinTable({})
     users?: User[];
 
     lastMsg: string;

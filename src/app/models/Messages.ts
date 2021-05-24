@@ -2,6 +2,7 @@ import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, Pr
 import { User } from "./Users";
 
 import { Group } from "./Groups";
+import { StatusMsgType } from "../types/MessageType";
 
 @Entity("messages")
 export class Message extends BaseEntity {
@@ -34,5 +35,7 @@ export class Message extends BaseEntity {
     @ManyToOne(() => Group, group => group.messages)
     @JoinColumn({name: "group_id"})
     group: Group;
+
+    status?: StatusMsgType;
 
 }
