@@ -1,14 +1,23 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, getCustomRepository, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, getCustomRepository, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { UsersRepository } from "../repositories/UsersRepository";
 
 import { Message } from "./Messages";
 import { UserGroup } from "./UserGroup";
 import { User } from "./Users";
-
+import { v4 } from 'uuid';
+import { MessagesRepository } from "../repositories/MessagesRepository";
 @Entity("groups")
 export class Group extends BaseEntity {
 
-    @PrimaryGeneratedColumn('uuid')
+    constructor(){
+        super()
+        if(!this.id){
+            this.id = v4();
+        }
+    }
+    @PrimaryColumn({ 
+        primary: true 
+    })
     id: string;
 
     @Column({
@@ -39,8 +48,6 @@ export class Group extends BaseEntity {
     @OneToMany(() => UserGroup, userGroup => userGroup.group, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     user_groups: UserGroup[];
 
-    @ManyToMany(() => User, user => user.groups)
-    @JoinTable({})
     users?: User[];
 
     lastMsg: string;
@@ -59,6 +66,21 @@ export class Group extends BaseEntity {
             ])
             .getMany()
         this.users = users;
+    }
+
+    async getLastMsg() {
+        const messagesRepository = getCustomRepository(MessagesRepository)
+        const message = await messagesRepository.createQueryBuilder('message')
+            .where('message.group_id = :group_id', { group_id: this.id })
+            .select([
+                'message.text',
+                'message.group_id',
+                'message.created_at',
+            ])
+            .orderBy('message.created_at','DESC')
+            .getOne()
+        this.lastMsg = String(message?.text);
+        this.lastMsgTime = String(message?.created_at);
     }
 
     async hasUser(userId: string) {

@@ -1,4 +1,5 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { v4 } from "uuid";
 
 import { Group } from "./Groups";
 import { User } from "./Users";
@@ -7,7 +8,15 @@ import { User } from "./Users";
 @Index(["user_id", "group_id"])
 export class UserGroup extends BaseEntity {
 
-    @PrimaryGeneratedColumn('uuid')
+    constructor(){
+        super()
+        if(!this.id){
+            this.id = v4();
+        }
+    }
+    @PrimaryColumn({ 
+        primary: true 
+    })
     id: string;
 
     @Column({

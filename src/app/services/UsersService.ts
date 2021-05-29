@@ -1,10 +1,8 @@
 import { compare } from "bcrypt"
 import { getCustomRepository, Repository } from "typeorm"
 import { Group } from "../models/Groups"
-import { UserGroup } from "../models/UserGroup"
 import { User } from "../models/Users"
 import { GroupRepository } from "../repositories/GroupsRepository"
-import { UserGroupUsersRepository } from "../repositories/UsersGroupsRepository"
 import { UsersRepository } from "../repositories/UsersRepository"
 
 class UsersService {

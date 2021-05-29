@@ -1,7 +1,7 @@
-import { createQueryBuilder, getCustomRepository, Repository } from "typeorm"
+import { getCustomRepository, Repository } from "typeorm"
 import { Message } from "../models/Messages"
 import { MessagesRepository } from "../repositories/MessagesRepository"
-import { IMessageCreate } from "../types/MessageType"
+import { IMessageCreate, StatusMsgType } from "../types/MessageType"
 
 class MessagesService {
     private messagesRepository: Repository<Message>
@@ -24,12 +24,38 @@ class MessagesService {
         await msg.save();
         return msg;
     }
-    async getMessagesByGroup(groupId: string){
+    async getMessagesByGroup(groupId: string, page: number) {
+        const limitDocsPerPage = 30;
         const messages = await this.messagesRepository.createQueryBuilder('message')
             .leftJoin('message.group', 'group')
-            .where('group.id = :group_id', {group_id: groupId})
+            .where('group.id = :group_id', { group_id: groupId })
             .getMany()
-        return messages; 
+        return messages;
+    }
+
+    async getMessagesByGroups(groupsIds: string[], meId: string, status: StatusMsgType) {
+        let sqlFormat = groupsIds.map(id => `'${id}'`).join(', ')
+        const messages = await this.messagesRepository.createQueryBuilder('message')
+            .leftJoin('message.group', 'group')
+            .andWhere(`group.id IN (${sqlFormat})`)
+            .andWhere('message.status = :status', { status })
+            .andWhere('message.user_id != :user_id', { user_id: meId })
+            .select([
+                'message.id',
+                'message.group_id'
+            ])
+            .getMany()
+        return messages;
+    }
+
+    async updateStatusMessages(ids: string[], status: StatusMsgType) {
+        await this.messagesRepository.createQueryBuilder('message')
+            .update()
+            .set({
+                status
+            })
+            .whereInIds(ids)
+            .execute()
     }
 }
 

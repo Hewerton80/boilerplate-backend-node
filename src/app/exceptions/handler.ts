@@ -9,6 +9,6 @@ export const errorRequestHandler: ErrorRequestHandler = (error, request, respons
     else if(error instanceof ConflictException){
         return response.status(409).json({ message: 'Conflict' })
     }
-    
+    console.log(error);
     return response.status(500).json({ message: 'Internal server Error' })
 }

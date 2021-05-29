@@ -1,4 +1,5 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { v4 } from "uuid";
 
 import { Group } from "./Groups";
 import { Message } from "./Messages";
@@ -7,7 +8,15 @@ import { UserGroup } from "./UserGroup";
 @Entity("users")
 export class User extends BaseEntity {
 
-    @PrimaryGeneratedColumn('uuid')    
+    constructor(){
+        super()
+        if(!this.id){
+            this.id = v4();
+        }
+    }
+    @PrimaryColumn({ 
+        primary: true 
+    })
     id: string;
 
     @Column({
@@ -24,6 +33,15 @@ export class User extends BaseEntity {
         type: 'varchar'
     })
     password?: string;
+
+    @Column({
+        type: 'boolean',
+        default: true
+    })
+    is_online: boolean;
+
+    @CreateDateColumn()
+    last_access_at?: Date;
 
     @CreateDateColumn()
     created_at?: Date;

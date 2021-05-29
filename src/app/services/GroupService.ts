@@ -41,21 +41,32 @@ class GroupsService {
 
     async getGroupsByUser(userId: string, type: 'private' | 'public' | 'all') {
         const query = this.groupsRepository.createQueryBuilder('groups')
-            .leftJoinAndSelect('groups.user_groups', 'user_groups')
+            .leftJoin('groups.user_groups', 'user_groups')
+    
+            // .leftJoin('groups.messages', 'messages')
+            .loadRelationCountAndMap('groups.countMsgsUnread', 'groups.messages', 'm', qb => (
+                qb
+                    .andWhere('m.user_id != :user_id', { user_id: userId })
+                    .andWhere('m.status != :status', { status: 'readed' })
+
+            ))
             .andWhere('user_groups.user_id = :user_id', { user_id: userId })
-            .select([
-                'groups.id',
-                'groups.name',
-                'groups.is_private',
-                'groups.created_at'
-            ])
+
+        // .select([
+        //     'groups.id',
+        //     'groups.name',
+        //     // 'countMsgsUnread',
+        //     'groups.is_private',
+        //     'groups.created_at',
+        //     'messages'
+        // ])
         if (type === 'private') {
             query.andWhere('groups.is_private = :is_private', { is_private: true })
-                // .leftJoinAndSelect('user_groups.user', 'user')
-                // .leftJoinAndMapOne('user_groups.user', 'user_groups.user', 'user', 'user.id != :user_id', { user_id: userId })
-                // .addSelect(['user'])
+            // .leftJoinAndSelect('user_groups.user', 'user')
+            // .leftJoinAndMapOne('user_groups.user', 'user_groups.user', 'user', 'user.id != :user_id', { user_id: userId })
+            // .addSelect(['user'])
         }
-        else if(type === 'public'){
+        else if (type === 'public') {
             query.andWhere('groups.is_private = :is_private', { is_private: false })
         }
         const groups = await query.getMany()

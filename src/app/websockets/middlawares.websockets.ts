@@ -5,7 +5,9 @@ import { ExtendedError } from 'socket.io/dist/namespace';
 import { ExtendedSocket, IJwt } from '../types/AuthTypes';
 
 export const  authenticate = (socket: Socket, next: (err?: ExtendedError | undefined) => void ) => {
-    const token = socket.handshake?.query.token;
+    const extendedSocket = socket as ExtendedSocket;
+
+    const token = extendedSocket.handshake?.query.token;
 
     if (!token) {
         return next(new Error('Authentication error'));
@@ -15,7 +17,7 @@ export const  authenticate = (socket: Socket, next: (err?: ExtendedError | undef
         if (err) {
             return next(new Error('Authentication error'));
         }
-        socket.user = decoded as IJwt;
+        extendedSocket.user = decoded as IJwt;
         next();
     });
 }

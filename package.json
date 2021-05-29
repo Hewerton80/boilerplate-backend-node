@@ -6,7 +6,7 @@
   "scripts": {
     "build": "yarn tsc",
     "start": "yarn build && node dist/server.js",
-    "start:dev": "nodemon",
+    "dev": "nodemon",
     "migration:create": "yarn build && typeorm migration:create -n",
     "migration:generate": "yarn build && typeorm migration:generate -n",
     "migration:run": "yarn build && typeorm migration:run",
