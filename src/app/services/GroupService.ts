@@ -1,19 +1,14 @@
-import { compare } from "bcrypt"
 import { getCustomRepository, Repository } from "typeorm"
-import { Group } from "../models/Groups"
-import { UserGroup } from "../models/UserGroup"
+import { Group } from "../models/Groups.model"
+import { UserGroup } from "../models/UserGroup.model"
 import { GroupRepository } from "../repositories/GroupsRepository"
-import { UserGroupRepository } from "../repositories/UsersGroupsRepository"
 
 class GroupsService {
     private groupsRepository: Repository<Group>
-    private groupUsersRepository: Repository<UserGroup>
 
     constructor() {
         this.groupsRepository = getCustomRepository(GroupRepository);
-        this.groupUsersRepository = getCustomRepository(UserGroupRepository);
     }
-
 
     async createPrivateGroup(authorId: string, otherUserId: string) {
         const privateGroup = new Group();
@@ -42,8 +37,6 @@ class GroupsService {
     async getGroupsByUser(userId: string, type: 'private' | 'public' | 'all') {
         const query = this.groupsRepository.createQueryBuilder('groups')
             .leftJoin('groups.user_groups', 'user_groups')
-    
-            // .leftJoin('groups.messages', 'messages')
             .loadRelationCountAndMap('groups.countMsgsUnread', 'groups.messages', 'm', qb => (
                 qb
                     .andWhere('m.user_id != :user_id', { user_id: userId })
@@ -51,20 +44,8 @@ class GroupsService {
 
             ))
             .andWhere('user_groups.user_id = :user_id', { user_id: userId })
-
-        // .select([
-        //     'groups.id',
-        //     'groups.name',
-        //     // 'countMsgsUnread',
-        //     'groups.is_private',
-        //     'groups.created_at',
-        //     'messages'
-        // ])
         if (type === 'private') {
             query.andWhere('groups.is_private = :is_private', { is_private: true })
-            // .leftJoinAndSelect('user_groups.user', 'user')
-            // .leftJoinAndMapOne('user_groups.user', 'user_groups.user', 'user', 'user.id != :user_id', { user_id: userId })
-            // .addSelect(['user'])
         }
         else if (type === 'public') {
             query.andWhere('groups.is_private = :is_private', { is_private: false })
@@ -72,6 +53,7 @@ class GroupsService {
         const groups = await query.getMany()
         return groups;
     }
+    
     async getPrivateGroupByUsers(meId: string, otherUserId: string) {
         const myGroups = await this.getGroupsByUser(meId, 'private');
         // console.log(myGroups)

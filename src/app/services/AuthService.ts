@@ -1,6 +1,6 @@
 import { getCustomRepository, Repository } from "typeorm"
 import { sign } from 'jsonwebtoken';
-import { User } from "../models/Users"
+import { User } from "../models/Users.model"
 import { hash } from 'bcrypt';
 import { UsersRepository } from "../repositories/UsersRepository"
 import { IJwt } from "../types/AuthTypes"

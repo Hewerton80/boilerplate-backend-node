@@ -1,13 +1,23 @@
-import { getCustomRepository, Repository } from "typeorm"
-import { Message } from "../models/Messages"
-import { MessagesRepository } from "../repositories/MessagesRepository"
+import { EntityManager, getCustomRepository, getManager, Repository } from "typeorm"
+import { Messages } from "../models/Messages.model"
+import { MessageRepository } from "../repositories/MessagesRepository"
 import { IMessageCreate, StatusMsgType } from "../types/MessageType"
 
 class MessagesService {
-    private messagesRepository: Repository<Message>
+    // private messagesRepository: Repository<Messages>;
+    private messagesRepository:EntityManager;
+
     constructor() {
-        this.messagesRepository = getCustomRepository(MessagesRepository)
+        try{
+            this.messagesRepository =  getManager()
+            // getCustomRepository(MessageRepository)
+        }
+        catch(err){
+            // console.log(err)
+            console.log('erro no super de messageService')
+        }
     }
+
     async create({
         id,
         user_id,
@@ -15,7 +25,7 @@ class MessagesService {
         created_at,
         text
     }: IMessageCreate) {
-        const msg = new Message();
+        const msg = new Messages();
         msg.id = String(id);
         msg.user_id = user_id;
         msg.text = text;
@@ -24,9 +34,11 @@ class MessagesService {
         await msg.save();
         return msg;
     }
+
     async getMessagesByGroup(groupId: string, page: number) {
+        // const messagesRepository = getCustomRepository(MessageRepository)
         const limitDocsPerPage = 30;
-        const messages = await this.messagesRepository.createQueryBuilder('message')
+        const messages = await this.messagesRepository.createQueryBuilder(Messages, 'message')
             .leftJoin('message.group', 'group')
             .where('group.id = :group_id', { group_id: groupId })
             .getMany()
@@ -34,8 +46,9 @@ class MessagesService {
     }
 
     async getMessagesByGroups(groupsIds: string[], meId: string, status: StatusMsgType) {
+        // const messagesRepository = getCustomRepository(MessageRepository)
         let sqlFormat = groupsIds.map(id => `'${id}'`).join(', ')
-        const messages = await this.messagesRepository.createQueryBuilder('message')
+        const messages = await this.messagesRepository.createQueryBuilder(Messages, 'message')
             .leftJoin('message.group', 'group')
             .andWhere(`group.id IN (${sqlFormat})`)
             .andWhere('message.status = :status', { status })
@@ -49,7 +62,8 @@ class MessagesService {
     }
 
     async updateStatusMessages(ids: string[], status: StatusMsgType) {
-        await this.messagesRepository.createQueryBuilder('message')
+        // const messagesRepository = getCustomRepository(MessageRepository)
+        await this.messagesRepository.createQueryBuilder(Messages, 'message')
             .update()
             .set({
                 status

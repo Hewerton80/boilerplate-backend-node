@@ -1,33 +1,33 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "./Users";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { User } from "./Users.model";
 
-import { Group } from "./Groups";
+import { Group } from "./Groups.model";
 import { StatusMsgType } from "../types/MessageType";
 import { v4 } from "uuid";
 
 @Entity("messages")
-export class Message extends BaseEntity {
+export class Messages extends BaseEntity {
 
-    constructor(){
+    constructor() {
         super()
-        if(!this.id){
+        if (!this.id) {
             this.id = v4();
         }
     }
-    @PrimaryColumn({ 
-        primary: true 
+    @PrimaryColumn({
+        primary: true
     })
     id: string;
 
     @Column({
         type: 'varchar'
-    })    
+    })
     text: string;
 
     @Column({
         type: 'varchar',
         default: 'sended'
-    })    
+    })
     status: StatusMsgType;
 
     @Column({
@@ -44,13 +44,10 @@ export class Message extends BaseEntity {
     created_at: Date;
 
     @ManyToOne(() => User, user => user.messages)
-    @JoinColumn({name: "user_id"})
+    @JoinColumn({ name: "user_id" })
     user: User;
 
     @ManyToOne(() => Group, group => group.messages)
-    @JoinColumn({name: "group_id"})
+    @JoinColumn({ name: "group_id" })
     group: Group;
-
-    
-
 }

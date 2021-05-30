@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 io.use(authenticate);
 
 io.on('connection', (socket: Socket) => {
-    // console.log('Se conectou', socket.id);
+    console.log('Se conectou', socket.id);
 })
 
 //routes

@@ -10,7 +10,7 @@ createConnection({
     database: process.env.DB_NAME,
     synchronize: false,
     entities: [
-        resolve(__dirname, '..', 'app', 'models', '*.{js,ts}')
+        resolve(__dirname, '..', 'app', '**', '*.model.{js,ts}')
     ],
 })
     .then(() => {

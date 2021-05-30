@@ -8,12 +8,6 @@ io.on("connect", async (socket) => {
     const me = extendedSocket?.user as IJwt;
     const messagesService = new MessagesService();
 
-    extendedSocket.on("send_message", async (message: IMessageCreate, callback) => {
-        const msg = await messagesService.create(message);
-        extendedSocket.broadcast.to(message.group_id).emit('receive_message', msg);
-        callback(msg);
-    });
-
     extendedSocket.on("get_messages_by_group", async (page: number, groupId: string, callback) => {
         const status = 'readed';
         const messages = await messagesService.getMessagesByGroup(groupId, page);
@@ -27,6 +21,13 @@ io.on("connect", async (socket) => {
         extendedSocket.broadcast.to(groupId).emit('update_status_messages', { ids, status });
         callback(messages);
     });
+
+    extendedSocket.on("send_message", async (message: IMessageCreate, callback) => {
+        const msg = await messagesService.create(message);
+        extendedSocket.broadcast.to(message.group_id).emit('receive_message', msg);
+        callback(msg);
+    });
+
 
     extendedSocket.on("update_status_message", async (message: IMessageCreate, status: StatusMsgType, callback) => {
         const ids = [message.id];

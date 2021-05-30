@@ -18,6 +18,8 @@ export const  authenticate = (socket: Socket, next: (err?: ExtendedError | undef
             return next(new Error('Authentication error'));
         }
         extendedSocket.user = decoded as IJwt;
+        console.log('meeeeeeeeeeee:  ', decoded)
+
         next();
     });
 }

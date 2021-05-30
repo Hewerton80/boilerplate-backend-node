@@ -1,9 +1,9 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { v4 } from "uuid";
 
-import { Group } from "./Groups";
-import { Message } from "./Messages";
-import { UserGroup } from "./UserGroup";
+import { Group } from "./Groups.model";
+import { Messages } from "./Messages.model";
+import { UserGroup } from "./UserGroup.model";
 
 @Entity("users")
 export class User extends BaseEntity {
@@ -41,13 +41,13 @@ export class User extends BaseEntity {
     is_online: boolean;
 
     @CreateDateColumn()
-    last_access_at?: Date;
+    last_access_at: Date;
 
     @CreateDateColumn()
     created_at?: Date;
 
-    @OneToMany(() => Message, message => message.user, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-    messages: Message[];
+    @OneToMany(() => Messages, message => message.user, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    messages: Messages[];
 
     @OneToMany(() => UserGroup, userGroup => userGroup.user, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     user_groups: UserGroup[];

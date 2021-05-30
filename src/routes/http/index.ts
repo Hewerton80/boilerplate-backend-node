@@ -7,7 +7,6 @@ import { AuthMiddleaware } from '../../app/http/middlawares/authmiddlaware';
 const routes = Router();
 
 const usersController = new UsersController()
-const messagesController = new MessagesController()
 const authController = new AuthController()
 const authMiddleaware = new AuthMiddleaware()
 

@@ -1,8 +1,8 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { v4 } from "uuid";
 
-import { Group } from "./Groups";
-import { User } from "./Users";
+import { Group } from "./Groups.model";
+import { User } from "./Users.model";
 
 @Entity("users_groups")
 @Index(["user_id", "group_id"])

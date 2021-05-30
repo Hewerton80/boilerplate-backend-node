@@ -1,22 +1,22 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, getCustomRepository, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, getCustomRepository, getManager, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from "typeorm";
 import { UsersRepository } from "../repositories/UsersRepository";
 
-import { Message } from "./Messages";
-import { UserGroup } from "./UserGroup";
-import { User } from "./Users";
+import { Messages } from "./Messages.model";
+import { UserGroup } from "./UserGroup.model";
+import { User } from "./Users.model";
 import { v4 } from 'uuid';
-import { MessagesRepository } from "../repositories/MessagesRepository";
+import { MessageRepository } from "../repositories/MessagesRepository";
 @Entity("groups")
 export class Group extends BaseEntity {
 
-    constructor(){
+    constructor() {
         super()
-        if(!this.id){
+        if (!this.id) {
             this.id = v4();
         }
     }
-    @PrimaryColumn({ 
-        primary: true 
+    @PrimaryColumn({
+        primary: true
     })
     id: string;
 
@@ -39,17 +39,19 @@ export class Group extends BaseEntity {
     created_at: Date;
 
     @ManyToOne(() => User)
-    @JoinColumn({name: "author_id"})
+    @JoinColumn({ name: "author_id" })
     user: User;
 
-    @OneToMany(() => Message, message => message.group, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-    messages: Message[];
+    @OneToMany(() => Messages, message => message.group, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    messages: Messages[];
 
     @OneToMany(() => UserGroup, userGroup => userGroup.group, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
     user_groups: UserGroup[];
 
     users?: User[];
 
+    is_online?: boolean;
+    last_access_at?: Date;
     lastMsg: string;
     lastMsgTime: string;
     countMsgsUnread: number;
@@ -63,24 +65,26 @@ export class Group extends BaseEntity {
                 'users.id',
                 'users.name',
                 'users.phone',
+                'users.is_online',
+                'users.last_access_at',
             ])
             .getMany()
         this.users = users;
     }
 
     async getLastMsg() {
-        const messagesRepository = getCustomRepository(MessagesRepository)
-        const message = await messagesRepository.createQueryBuilder('message')
+        const maneger = getManager()
+        const message = await maneger.createQueryBuilder(Messages, 'message')
             .where('message.group_id = :group_id', { group_id: this.id })
             .select([
                 'message.text',
                 'message.group_id',
                 'message.created_at',
             ])
-            .orderBy('message.created_at','DESC')
+            .orderBy('message.created_at', 'DESC')
             .getOne()
-        this.lastMsg = String(message?.text);
-        this.lastMsgTime = String(message?.created_at);
+        this.lastMsg = String(message?.text || '');
+        this.lastMsgTime = String(message?.created_at || this.created_at);
     }
 
     async hasUser(userId: string) {
