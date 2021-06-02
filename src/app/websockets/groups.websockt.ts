@@ -14,7 +14,6 @@ io.on("connect", async (socket) => {
 
     extendedSocket.on("get_my_groups", async (page: number, callback) => {
         const groups = await groupsService.getGroupsByUser(me.id, 'all');
-        console.log(groups)
         await Promise.all(groups.map(async gp => {
             await gp.getUsers();
             await gp.getLastMsg();
@@ -31,8 +30,14 @@ io.on("connect", async (socket) => {
             }
         });
 
+        const groupsIds = groups.map(gp => gp.id);
+        extendedSocket.broadcast.to(groupsIds).emit('update_user_status', {
+            groupsIds,
+            is_online: true,
+            last_access_at: new Date()
+        });
+
         if(groups.length > 0){
-            const groupsIds = groups.map(gp => gp.id);
             messageService.getMessagesByGroups(groupsIds, me.id, 'sended')
                 .then(async allMessagesthetIReceived => {
                     const allMsgsIds = allMessagesthetIReceived.map(msg => msg.id);
