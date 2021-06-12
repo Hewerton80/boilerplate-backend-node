@@ -1,7 +1,4 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
-import { MessagesRepository } from "../../repositories/MessagesRepository";
-import { MessagesService } from "../../services/MessagesService";
 
 class MessagesController {
     async create(request: Request, response: Response) {
