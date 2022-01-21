@@ -1,63 +1,55 @@
-import { getCustomRepository, Repository } from "typeorm"
-import { sign } from 'jsonwebtoken';
-import { User } from "../models/Users.model"
-import { hash } from 'bcrypt';
-import { UsersRepository } from "../repositories/UsersRepository"
-import { IJwt } from "../types/AuthTypes"
-import { UsersService } from "./UsersService"
-import { BadRequestException, ConflictException } from "../../config/errors";
+import { compare } from 'bcrypt'
+import { sign } from 'jsonwebtoken'
+import { BadRequestException } from '../../config/errors'
+import { JwtDto } from '../dtos/JwtDto'
+import { CreateUserDto, LoginDto } from '../dtos/UserDtos'
+import { UserService } from './UserService'
 
 export class AuthService {
-    userService: UsersService
-    constructor() {
-        this.userService = new UsersService();
+  userService: UserService
+  constructor() {
+    this.userService = new UserService()
+  }
+
+  async login({ email, password }: LoginDto) {
+    const user = await this.userService.getUserByEmail(email)
+    if (!user) {
+      throw new BadRequestException('credenciais inválidas')
     }
-
-    async signIn(phone: string, password: string) {
-        const user = await this.userService.getUserByPhone(phone);
-        if(!user){
-            console.log('user: ',user)
-            throw new BadRequestException('credenciais inválidas')
-        }
-        const passwordMatche = await this.userService.comparePassword(password, String(user.password) ) 
-        if (!passwordMatche) {
-            throw new BadRequestException('credenciais inválidas')
-        }      
-        const token = this.generateToken({ id: user.id, name: user.name, phone });
-        delete user.password;
-        return {
-            user,
-            token
-        }
+    const passwordMatche = await compare(password, user.password)
+    if (!passwordMatche) {
+      throw new BadRequestException('credenciais inválidas')
     }
-
-    async signUp(name: string, phone: string, password: string) {
-        let user = await this.userService.getUserByPhone(phone);
-        if(user){
-            throw new ConflictException('credenciais inválidas')
-        }
-        user = new User();
-        user.name = name;
-        user.phone = phone;
-        user.password = await hash(password, 10);
-        try {
-            await user.save(); 
-        }
-        catch(err){
-            throw new BadRequestException('opsss')
-        }        
-        const token = this.generateToken({ id: user.id, name, phone });
-        delete user.password;
-
-        return {
-            user,
-            token
-        }
+    const token = this.generateToken({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    })
+    user.password = ''
+    return {
+      user,
+      token,
     }
+  }
 
-    generateToken({ id, name, phone }: IJwt) {
-        return sign({ id, name, phone }, String(process.env.TOKEN_SECRET), { expiresIn: "7d" });
+  async signUp({ name, email, password, role }: CreateUserDto) {
+    const user = await this.userService.createUser({ name, email, password, role })
+    const token = this.generateToken({
+      id: user.id,
+      name,
+      email: user.email,
+      role: user.role,
+    })
+    return {
+      user,
+      token,
     }
+  }
 
-
+  generateToken({ id, name, role, email }: JwtDto) {
+    return sign({ id, name, role, email }, String(process.env.TOKEN_SECRET), {
+      expiresIn: '1d',
+    })
+  }
 }

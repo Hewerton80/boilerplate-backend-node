@@ -1,9 +1,11 @@
-import { IJwt } from "../../src/app/types/AuthTypes";
+// import { IJwt } from "../../src/app/types/AuthTypes";
+
+import { JwtDto } from "../../src/app/dtos/JwtDto";
 
 declare global {
     namespace Express {
         interface Request {
-            user: IJwt
+            user: JwtDto
         }
     }
 }
@@ -11,7 +13,7 @@ declare global {
 declare global {
     namespace SocketIo {
         interface Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap> {
-            user: IJwt
+            user: JwtDto
         }
     }
 }
